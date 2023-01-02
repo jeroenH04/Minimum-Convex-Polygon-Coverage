@@ -60,7 +60,7 @@ def getTriangleData(instanceName):
     return vertices, holes, segments
 
 
-instance_name = "srpg_octa_mc0001647.instance"
+instance_name = "fpg-poly_0000000020_h1" + ".instance"
 triangleData = getTriangleData(instance_name)
 # vertices = {
 #     'vertices': triangleData[0],
@@ -72,5 +72,6 @@ vertices = triangleData[0]
 for holes in triangleData[1]:
     vertices.append(holes)
 
-DT = d.DelaunayTriangulation(vertices)
+DT = d.DelaunayTriangulation(vertices, instance_name)
+DT.export()
 DT.plot()

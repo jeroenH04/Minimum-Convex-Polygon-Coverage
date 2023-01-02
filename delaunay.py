@@ -2,6 +2,7 @@ import numpy as np
 from typing import List
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
+import json
 
 
 class Vertex:
@@ -106,12 +107,13 @@ def edgeIsSharedByOtherTriangles(edge: Edge, triangle: Triangle, triangles: List
 
 
 class DelaunayTriangulation:
-    def __init__(self, vertices):
+    def __init__(self, vertices, name):
         """
         Initialize Delaunay Triangulation by calculating the super triangle for the Bowyer Watson algorithm
 
         :param vertices: vertices to be triangulated
         """
+        self.name = name
         self.triangulation = []
 
         self.superPointA, self.superPointB, self.superPointC = calculateSuperTriangleVertices(vertices)
@@ -175,3 +177,24 @@ class DelaunayTriangulation:
         ax.triplot(tri.Triangulation(x_s, y_s, ts), 'bo--')
         ax.set_title('Plot of Delaunay triangulation')
         plt.show()
+
+    def export(self):
+        export = {
+            "type": "CGSHOP2023_Solution",
+            "instance": self.name,
+            "polygons": []
+        }
+
+        for triangle in self.triangulation:
+            export['polygons'].append([
+                {'x': triangle.v[0].x, 'y': triangle.v[0].y},
+                {'x': triangle.v[1].x, 'y': triangle.v[1].y},
+                {'x': triangle.v[2].x, 'y': triangle.v[2].y}
+            ])
+
+        # Serializing json
+        json_object = json.dumps(export, indent=4)
+
+        # Writing to sample.json
+        with open(self.name + "-sol" + ".json", "w") as outfile:
+            outfile.write(json_object)
