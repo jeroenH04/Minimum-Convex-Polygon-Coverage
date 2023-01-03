@@ -37,6 +37,21 @@ class Triangle:
         return (self.v[0] == vertex) or (self.v[1] == vertex) or (self.v[2] == vertex)
 
 
+def areaOfTriangle(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex):
+    return abs((a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2.0)
+
+
+def isInside(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex, d: dll.Vertex):
+    if (d.x == a.x and d.y == a.y) or (d.x == b.x and d.y == b.y) or (d.x == c.x and d.y == c.y):
+        return False
+
+    A = areaOfTriangle(a, b, c)
+    A1 = areaOfTriangle(d, b, c)
+    A2 = areaOfTriangle(a, d, c)
+    A3 = areaOfTriangle(a, b, d)
+    return A == A1 + A2 + A3
+
+
 class EarClipping:
     def __init__(self, vertices: dll.DoublyLinkedList, name: str):
         """
@@ -58,12 +73,25 @@ class EarClipping:
         :param c: Vertex
         :return: angle
         """
+        containsPoint = False
+
         ang = math.degrees(math.atan2(c.y - b.y, c.x - b.x) - math.atan2(a.y - b.y, a.x - b.x))
         ang = ang + 360 if ang < 0 else ang
 
-        if ang < 180:
-            # Convex
-            self.earTips.append(b)
+        if ang < 180:  # Convex
+            idx = 0
+            v = self.vertices.head
+            while idx < self.vertices.length():
+                if isInside(a, b, c, v.vertex):
+                    # Check if the closure of the triangle does not contain any (reflex) vertex of P
+                    containsPoint = True
+                    break
+
+                v = v.next
+                idx += 1
+
+            if not containsPoint:
+                self.earTips.append(b)
 
         return ang
 
@@ -79,9 +107,8 @@ class EarClipping:
 
         # Calculate angles of all vertices in DLL and collect convex vertices
         while idx < self.vertices.length():
-            if v.previous and v.next:
-                angle = self.getAngle(v.next.vertex, v.vertex, v.previous.vertex)
-                v.vertex.angle = angle
+            angle = self.getAngle(v.next.vertex, v.vertex, v.previous.vertex)
+            v.vertex.angle = angle
 
             v = v.next
             idx += 1

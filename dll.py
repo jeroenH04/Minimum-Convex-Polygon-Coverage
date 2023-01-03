@@ -1,4 +1,5 @@
 import gc
+import math
 
 
 class Vertex:
@@ -12,8 +13,11 @@ class Vertex:
         self.y = y
         self.angle = angle
 
-    def __eq__(self, other):
-        return self.x == other.x and self.y == other.y and self.angle == other.angle
+    # def __eq__(self, other):
+    #     return self.x == other.x and self.y == other.y and self.angle == other.angle
+
+    def calculateDistance(self, other):
+        return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
 
 
 class Node:
@@ -60,11 +64,11 @@ class DoublyLinkedList:
         :param value: Vertex
         :param finalNode: whether this node is the final node to be added, to make the DLL circular
         """
-        self.size += 1
         new_node = Node(value)
         if self.isEmpty():
             self.insertAtBeginning(value)
         else:
+            self.size += 1
             temp = self.head
             while temp.next is not None:
                 temp = temp.next
@@ -97,18 +101,21 @@ class DoublyLinkedList:
         Delete `value` from the DLL
         :param value: Vertex
         """
-        self.size -= 1
         if self.isEmpty():
             print("Linked List is empty. Cannot delete elements.")
         elif self.head.next is None:
+            self.size -= 1
             if self.head.vertex == value:
                 self.head = None
         else:
+            self.size -= 1
             temp = self.head
+            idx = 0
             while temp is not None:
                 if temp.vertex == value:
                     break
                 temp = temp.next
+                idx += 1
 
             if temp is None:
                 print("Element not present in linked list. Cannot delete element.")
