@@ -138,9 +138,10 @@ class DelaunayTriangulation:
                     triangle.containsVertex(self.superPointC):
                 self.triangulation.remove(triangle)
 
-    def addVertex(self, vertex):
+    def addVertex(self, vertex: Vertex):
         """
         :param vertex: vertex to be added to the triangulation
+        :param prevVertex: previous handled vertex
         """
         # Create empty set of triangles that are no longer valid
         badTriangles = []
@@ -167,15 +168,22 @@ class DelaunayTriangulation:
             self.triangulation.append(Triangle(edge.v1, edge.v2, vertex))
 
     def plot(self):
-        ps = [p for t in self.triangulation for p in t.v]
+        ps = []
+        for t in self.triangulation:
+            for p in t.v:
+                ps.append(p)
+
         x_s = [p.x for p in ps]
         y_s = [p.y for p in ps]
 
-        ts = [(ps.index(t.v[0]), ps.index(t.v[1]), ps.index(t.v[2])) for t in self.triangulation]
+        ts = []
+        for t in self.triangulation:
+            ts.append((ps.index(t.v[0]), ps.index(t.v[1]), ps.index(t.v[2])))
 
         fig, ax = plt.subplots()
         ax.triplot(tri.Triangulation(x_s, y_s, ts), 'bo--')
         ax.set_title('Plot of Delaunay triangulation')
+
         plt.show()
 
     def export(self):

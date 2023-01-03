@@ -1,4 +1,6 @@
 import delaunay as d
+import earclipping as e
+import dll as dll
 import json
 
 
@@ -17,61 +19,57 @@ def pointMap(o):
 
 def getTriangleData(instanceName):
     instance = loadJSON(instanceName)
-
-    index = 0
-    vertices = []
-    holes = []
-    segments = []
+    verticesDoublyLinkedList = dll.DoublyLinkedList()
 
     outer_boundary = instance["outer_boundary"]
     outer_boundary = list(map(pointMap, outer_boundary))
 
+    n = len(outer_boundary)
     for idx, v in enumerate(outer_boundary):
-        vertices.append([v[0], v[1]])
-        if idx == len(outer_boundary) - 1:
-            # Connect the last vertex to the first vertex of the outer_boundary
-            segments.append([idx, 0])
-        else:
-            segments.append([idx, idx + 1])
+        verticesDoublyLinkedList.insertAtEnd(dll.Vertex(v[0], v[1], 0), idx == n - 1)
 
-        index += 1
+        # if idx == len(outer_boundary) - 1:
+        #     # Connect the last vertex to the first vertex of the outer_boundary
+        #     segments.append([idx, 0])
+        # else:
+        #     segments.append([idx, idx + 1])
+        #
+        # index += 1
 
-    for hole in instance["holes"]:
-        x = []
-        y = []
-        inner_boundary = list(map(pointMap, hole))
-        for idx, v in enumerate(inner_boundary):
-            vertices.append([v[0], v[1]])
-            x.append(v[0])
-            y.append(v[1])
+    # for hole in instance["holes"]:
+    #     x = []
+    #     y = []
+    #     inner_boundary = list(map(pointMap, hole))
+    #     for idx, v in enumerate(inner_boundary):
+    #         vertices.append([v[0], v[1]])
+    #         x.append(v[0])
+    #         y.append(v[1])
+    #
+    #         if idx == len(inner_boundary) - 1:
+    #             # Connect the last vertex to the first vertex of this inner boundary
+    #             segments.append([index, index - len(inner_boundary) + 1])
+    #         else:
+    #             segments.append([index, index + 1])
+    #
+    #         index += 1
+    #
+    #     # Calculate the centroid of the hole
+    #     centroid = [sum(x) / len(inner_boundary), sum(y) / len(inner_boundary)]
+    #     holes.append(centroid)
 
-            if idx == len(inner_boundary) - 1:
-                # Connect the last vertex to the first vertex of this inner boundary
-                segments.append([index, index - len(inner_boundary) + 1])
-            else:
-                segments.append([index, index + 1])
-
-            index += 1
-
-        # Calculate the centroid of the hole
-        centroid = [sum(x) / len(inner_boundary), sum(y) / len(inner_boundary)]
-        holes.append(centroid)
-
-    return vertices, holes, segments
+    return verticesDoublyLinkedList
 
 
-instance_name = "fpg-poly_0000000020_h1" + ".instance"
-triangleData = getTriangleData(instance_name)
-# vertices = {
-#     'vertices': triangleData[0],
-#     'holes': triangleData[1],
-#     'segments': triangleData[2]
-# }
+instance_name = "example_instance1" + ".instance"
+vertices = getTriangleData(instance_name)
 
-vertices = triangleData[0]
-for holes in triangleData[1]:
-    vertices.append(holes)
+# DT = d.DelaunayTriangulation(vertices, instance_name)
+# DT.plot()
 
-DT = d.DelaunayTriangulation(vertices, instance_name)
-DT.export()
+DT = e.EarClipping(vertices, instance_name)
 DT.plot()
+# DT.export()
+
+
+
+
