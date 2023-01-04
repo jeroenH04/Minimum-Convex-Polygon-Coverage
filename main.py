@@ -18,17 +18,6 @@ def pointMap(o):
     return o["x"], o["y"]
 
 
-def ccw(x1, y1, x2, y2, x3, y3):
-    """Returns True if the points (x2, y2) and (x3, y3) are counterclockwise
-    with respect to (x1, y1), and False otherwise.
-    """
-    a = x2 - x1
-    b = y2 - y1
-    c = x3 - x1
-    d = y3 - y1
-    return a * d > b * c
-
-
 def direction(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex):
     val = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y)
     if val == 0:
