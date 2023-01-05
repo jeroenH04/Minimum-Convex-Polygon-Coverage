@@ -18,7 +18,13 @@ def pointMap(o):
     return o["x"], o["y"]
 
 
-def direction(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex):
+def direction(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex) -> bool:
+    """
+    :param a: Vertex
+    :param b: Vertex
+    :param c: Vertex
+    :return: bool
+    """
     val = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y)
     if val == 0:
         return 0  # Colinear
@@ -27,11 +33,23 @@ def direction(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex):
     return 1  # CW
 
 
-def linesIntersect(v1: dll.Vertex, v2: dll.Vertex, v3: dll.Vertex, v4: dll.Vertex):
-    dir1 = direction(v1, v2, v3)
-    dir2 = direction(v1, v2, v3)
-    dir3 = direction(v3, v4, v1)
-    dir4 = direction(v3, v4, v2)
+def linesIntersect(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex, d: dll.Vertex) -> bool:
+    """
+    Check if the line (a,b) intersects the line (c,d)
+    :param a: Vertex
+    :param b: Vertex
+    :param c: Vertex
+    :param d: Vertex
+    :return: bool
+    """
+    if (a.x == c.x and a.y == c.y) or (a.x == d.x and a.y == d.y) or \
+            (b.x == c.x and b.y == c.y) or (b.x == d.x and b.y == d.y):
+        return False
+
+    dir1 = direction(a, b, c)
+    dir2 = direction(a, b, d)
+    dir3 = direction(c, d, a)
+    dir4 = direction(c, d, b)
 
     return dir1 != dir2 and dir3 != dir4
 
@@ -49,7 +67,7 @@ def getTriangleData(instanceName):
 
     for hole in instance["holes"]:
         """
-        Create pairs between the inner vertices and the outer vertices
+        Create pairs between the inner vertices and the outer vertices to find bridge candidates
         based on `Ear-Clipping Based Algorithms of Generating High-quality Polygon Triangulation` by Mei, Gang et al
         """
         pairs: List[dll.Vertex, dll.Vertex, float] = []
@@ -71,6 +89,7 @@ def getTriangleData(instanceName):
                 outerVertex = outerVertex.next
                 outerIdx += 1
 
+        # Sort the bridge candidate pairs on distance
         pairs.sort(key=lambda pair: pair[2], reverse=True)
         found = False
         innerBridge, outerBridge = None, None
@@ -82,7 +101,7 @@ def getTriangleData(instanceName):
             bridgeCandidate = pairs.pop()
             innerBridge, outerBridge = bridgeCandidate[0], bridgeCandidate[1]
 
-            # Check if any outer intersects the bridge candidate
+            # Check if any outer edge intersects the bridge candidate
             outerIdx = 0
             outerVertex = verticesDoublyLinkedList.head
             while outerIdx < verticesDoublyLinkedList.length():
@@ -97,11 +116,18 @@ def getTriangleData(instanceName):
                 # If the bridge candidate intersected with one of the outer edges, reject this candidate
                 continue
 
-            for idx, v in enumerate(inner_boundary):
-                innerVertex = dll.Vertex(v[0], v[1])
-                nextInnerVertex = dll.Vertex(inner_boundary[(idx + 1) % n][0], inner_boundary[(idx + 1) % n][1])
-                if linesIntersect(innerBridge, outerBridge, innerVertex, nextInnerVertex):
-                    intersect = True
+            for hole2 in instance["holes"]:
+                inner_boundary2 = list(map(pointMap, hole2))
+                n = len(inner_boundary2)
+                for idx, v in enumerate(inner_boundary2):
+                    # Check if any of the inner edge intersect the bridge candidate
+                    innerVertex = dll.Vertex(v[0], v[1])
+                    nextInnerVertex = dll.Vertex(inner_boundary2[(idx + 1) % n][0], inner_boundary2[(idx + 1) % n][1])
+                    if linesIntersect(innerBridge, outerBridge, innerVertex, nextInnerVertex):
+                        intersect = True
+                        break
+
+                if intersect:
                     break
 
             if not intersect:
@@ -150,7 +176,7 @@ def getTriangleData(instanceName):
     return verticesDoublyLinkedList
 
 
-instance_name = "fpg-poly_0000000020_h1" + ".instance"
+instance_name = "maze_79_50_05_005" + ".instance"
 vertices = getTriangleData(instance_name)
 
 # Useful for debugging:
