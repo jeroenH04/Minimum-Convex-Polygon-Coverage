@@ -1,4 +1,3 @@
-import numpy as np
 import dll as dll
 from typing import List
 import matplotlib.pyplot as plt
@@ -6,7 +5,8 @@ import matplotlib.tri as tri
 import json
 import math
 from copy import deepcopy
-
+# import sys
+# sys.setrecursionlimit(100000000)
 
 class Edge:
     def __init__(self, v1: dll.Vertex, v2: dll.Vertex):
@@ -29,11 +29,19 @@ class Triangle:
         self.edges: List[Edge] = [Edge(a, b), Edge(b, c), Edge(c, a)]
 
 
-def areaOfTriangle(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex):
+def areaOfTriangle(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex) -> float:
     return abs((a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2.0)
 
 
 def isInside(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex, d: dll.Vertex):
+    """
+    Check if vertex D is inside the triangle (a,b,c)
+    :param a:
+    :param b:
+    :param c:
+    :param d:
+    :return:
+    """
     if (d.x == a.x and d.y == a.y) or (d.x == b.x and d.y == b.y) or (d.x == c.x and d.y == c.y):
         return False
 
@@ -41,7 +49,8 @@ def isInside(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex, d: dll.Vertex):
     A1 = areaOfTriangle(d, b, c)
     A2 = areaOfTriangle(a, d, c)
     A3 = areaOfTriangle(a, b, d)
-    return A == A1 + A2 + A3
+
+    return math.isclose(A, A1 + A2 + A3, rel_tol=1e-5)
 
 
 class EarClipping:

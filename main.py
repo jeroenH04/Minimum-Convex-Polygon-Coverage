@@ -191,7 +191,7 @@ def getTriangleData(instanceName):
     return verticesDoublyLinkedList
 
 
-instance_name = "ccheese142" + ".instance"
+instance_name = "maze_4344_250_001_01" + ".instance"
 vertices = getTriangleData(instance_name)
 
 # Useful for debugging:
