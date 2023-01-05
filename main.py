@@ -1,6 +1,7 @@
 import delaunay as d
 import earclipping as e
 import dll as dll
+import hm as hm
 import json
 from typing import List
 
@@ -179,5 +180,6 @@ vertices = getTriangleData(instance_name)
 # DT.plot()
 
 DT = e.EarClipping(vertices, instance_name)
+DT = hm.HertelMehlhorn(DT)
 DT.plot()
 DT.export()
