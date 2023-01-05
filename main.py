@@ -4,7 +4,6 @@ import json
 from typing import List
 import matplotlib.pyplot as plt
 from datetime import datetime
-import math
 
 
 def loadJSON(instanceName):
@@ -64,36 +63,10 @@ def getTriangleData(instanceName):
     outer_boundary = list(map(pointMap, outer_boundary))
 
     n = len(outer_boundary)
-    minX = minY = 2 ** 32
-    maxX = maxY = 0
     for idx, v in enumerate(outer_boundary):
-        maxX = max(maxX, v[0])
-        minX = min(minX, v[0])
-        maxY = max(maxY, v[1])
-        minY = min(minY, v[1])
         verticesDoublyLinkedList.insertAtEnd(dll.Vertex(v[0], v[1], 0), idx == n - 1)
 
-    c = [maxX - minX, maxY - minY]
     holes = instance["holes"]
-
-    # # Sort the holes based on distance to the center
-    # for i, hole in enumerate(holes):
-    #     x = []
-    #     y = []
-    #     inner_boundary = list(map(pointMap, hole))
-    #     for idx, v in enumerate(inner_boundary):
-    #         x.append(v[0])
-    #         y.append(v[1])
-    #
-    #     # Calculate the centroid of the hole
-    #     centroid = [sum(x) / len(inner_boundary), sum(y) / len(inner_boundary)]
-    #     distance = math.sqrt((centroid[0] - c[0]) ** 2 + (centroid[1] - c[1]) ** 2)
-    #     holes[i] = [distance] + hole
-    #
-    # holes.sort(key=lambda hole: hole[0], reverse=True)
-    #
-    # for hole in holes:
-    #     hole.pop(0)
 
     # Add holes to the polygon
     for hole in holes:
@@ -132,14 +105,15 @@ def getTriangleData(instanceName):
 
         # Sort the bridge candidate pairs on distance
         pairs.sort(key=lambda pair: pair[2], reverse=True)
-        found = False
+        found = noPairs = False
         innerBridge, outerBridge = None, None
 
         while not found:
             if len(pairs) == 0:
                 # If there are no pairs anymore for this hole, add it to the end
                 # and continue with another hole
-                instance["holes"].append(hole)
+                holes.append(hole)
+                noPairs = True
                 break
 
             intersect = False
@@ -213,6 +187,9 @@ def getTriangleData(instanceName):
 
             if not intersect:
                 found = True
+
+        if noPairs:
+            continue
 
         outerIdx = 0
         outerVertex = verticesDoublyLinkedList.head
