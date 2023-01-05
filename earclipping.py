@@ -5,8 +5,9 @@ import matplotlib.tri as tri
 import json
 import math
 from copy import deepcopy
-# import sys
-# sys.setrecursionlimit(100000000)
+import sys, threading
+# sys.setrecursionlimit(10**7) # max depth of recursion
+# threading.stack_size(2**27)  # new thread will get stack of such size
 
 class Edge:
     def __init__(self, v1: dll.Vertex, v2: dll.Vertex):
@@ -59,12 +60,14 @@ class EarClipping:
         :param vertices: DLL of the vertices of the polygon
         :param name: name of the instance
         """
+        print('init started')
         self.name = name
         self.triangulation = []
         self.vertices = vertices
         self.allVertices = deepcopy(vertices)
         self.earTips = []
 
+        print('init done')
         self.triangulate()
 
     def getAngle(self, a: dll.Vertex, b: dll.Vertex, c: dll.Vertex):
@@ -151,6 +154,7 @@ class EarClipping:
 
                 idx += 1
                 temp = temp.next
+
 
         if len(self.earTips) == 3:
             # If there are still 3 ear tips left, add them as a triangle
