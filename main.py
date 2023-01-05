@@ -2,6 +2,9 @@ import earclipping as e
 import dll as dll
 import json
 from typing import List
+import matplotlib.pyplot as plt
+from datetime import datetime
+import math
 
 
 def loadJSON(instanceName):
@@ -61,10 +64,39 @@ def getTriangleData(instanceName):
     outer_boundary = list(map(pointMap, outer_boundary))
 
     n = len(outer_boundary)
+    minX = minY = 2 ** 32
+    maxX = maxY = 0
     for idx, v in enumerate(outer_boundary):
+        maxX = max(maxX, v[0])
+        minX = min(minX, v[0])
+        maxY = max(maxY, v[1])
+        minY = min(minY, v[1])
         verticesDoublyLinkedList.insertAtEnd(dll.Vertex(v[0], v[1], 0), idx == n - 1)
 
-    for hole in instance["holes"]:
+    c = [maxX - minX, maxY - minY]
+    holes = instance["holes"]
+
+    # # Sort the holes based on distance to the center
+    # for i, hole in enumerate(holes):
+    #     x = []
+    #     y = []
+    #     inner_boundary = list(map(pointMap, hole))
+    #     for idx, v in enumerate(inner_boundary):
+    #         x.append(v[0])
+    #         y.append(v[1])
+    #
+    #     # Calculate the centroid of the hole
+    #     centroid = [sum(x) / len(inner_boundary), sum(y) / len(inner_boundary)]
+    #     distance = math.sqrt((centroid[0] - c[0]) ** 2 + (centroid[1] - c[1]) ** 2)
+    #     holes[i] = [distance] + hole
+    #
+    # holes.sort(key=lambda hole: hole[0], reverse=True)
+    #
+    # for hole in holes:
+    #     hole.pop(0)
+
+    # Add holes to the polygon
+    for hole in holes:
         # Useful for debugging:
         # i = 0
         # o = verticesDoublyLinkedList.head
@@ -104,6 +136,12 @@ def getTriangleData(instanceName):
         innerBridge, outerBridge = None, None
 
         while not found:
+            if len(pairs) == 0:
+                # If there are no pairs anymore for this hole, add it to the end
+                # and continue with another hole
+                instance["holes"].append(hole)
+                break
+
             intersect = False
 
             # Get bridge candidate: pair with shortest distance
@@ -219,22 +257,35 @@ def getTriangleData(instanceName):
     return verticesDoublyLinkedList
 
 
-instance_name = "fpg-poly_0000004900_h2" + ".instance"
-vertices = getTriangleData(instance_name)
+def main(instance_name: str, plot=True, export=True):
+    timestamp = datetime.now()
+    print('Started creating doubly linked list...')
+    instance_name = instance_name + ".instance"
+    vertices = getTriangleData(instance_name)
+    print('Created doubly linked list in: ', datetime.now() - timestamp)
+    print('Start triangulation...')
+    timestamp = datetime.now()
 
-# Useful for debugging:
-# i = 0
-# o = vertices.head
-# while i < vertices.length():
-#     plt.plot([o.vertex.x, o.next.vertex.x], [o.vertex.y, o.next.vertex.y], '-')
-#     print('vertex: ' + str(o.vertex.x) + ', ' + str(o.vertex.y) + ' '
-#           'next: ' + str(o.next.vertex.x) + ', ' + str(o.next.vertex.y) + ' '
-#           'previous: ' + str(o.previous.vertex.x) + ', ' + str(o.previous.vertex.y)
-#           )
-#     o = o.next
-#     i += 1
-# plt.show()
+    # Useful for debugging:
+    # i = 0
+    # o = vertices.head
+    # while i < vertices.length():
+    #     plt.plot([o.vertex.x, o.next.vertex.x], [o.vertex.y, o.next.vertex.y], '-')
+    #     print('vertex: ' + str(o.vertex.x) + ', ' + str(o.vertex.y) + ' '
+    #           'next: ' + str(o.next.vertex.x) + ', ' + str(o.next.vertex.y) + ' '
+    #           'previous: ' + str(o.previous.vertex.x) + ', ' + str(o.previous.vertex.y)
+    #           )
+    #     o = o.next
+    #     i += 1
+    # plt.show()
 
-DT = e.EarClipping(vertices, instance_name)
-DT.plot()
-DT.export()
+    DT = e.EarClipping(vertices, instance_name)
+    print('Created triangulation in: ', datetime.now() - timestamp)
+
+    if plot:
+        DT.plot()
+    if export:
+        DT.export()
+
+
+main('ccheese4390')
