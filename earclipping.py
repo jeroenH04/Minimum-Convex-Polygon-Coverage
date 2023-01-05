@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import json
 import math
-from copy import deepcopy
+from copy import copy
 import sys, threading
-# sys.setrecursionlimit(10**7) # max depth of recursion
-# threading.stack_size(2**27)  # new thread will get stack of such size
+sys.setrecursionlimit(10**7) # max depth of recursion
+threading.stack_size(2**27)  # new thread will get stack of such size
+
 
 class Edge:
     def __init__(self, v1: dll.Vertex, v2: dll.Vertex):
@@ -31,17 +32,25 @@ class Triangle:
 
 
 def areaOfTriangle(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex) -> float:
+    """
+    Calculate the area of a triangle
+    :param a: Vertex
+    :param b: Vertex
+    :param c: Vertex
+    :return: float
+    """
     return abs((a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2.0)
 
 
-def isInside(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex, d: dll.Vertex):
+def isInside(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex, d: dll.Vertex) -> bool:
     """
-    Check if vertex D is inside the triangle (a,b,c)
-    :param a:
-    :param b:
-    :param c:
-    :param d:
-    :return:
+    Check if vertex d is inside the triangle (a,b,c).
+    If d only touches the triangle, it is not considered to be inside
+    :param a: Vertex
+    :param b: Vertex
+    :param c: Vertex
+    :param d: Vertex
+    :return: bool
     """
     if (d.x == a.x and d.y == a.y) or (d.x == b.x and d.y == b.y) or (d.x == c.x and d.y == c.y):
         return False
@@ -60,19 +69,18 @@ class EarClipping:
         :param vertices: DLL of the vertices of the polygon
         :param name: name of the instance
         """
-        print('init started')
         self.name = name
         self.triangulation = []
         self.vertices = vertices
-        self.allVertices = deepcopy(vertices)
+        self.allVertices = copy(vertices)
         self.earTips = []
-
-        print('init done')
         self.triangulate()
 
     def getAngle(self, a: dll.Vertex, b: dll.Vertex, c: dll.Vertex):
         """
-        Calculate the angle between 3 vertices, and add it to the ear tips list if the angle is convex
+        Calculate the angle between (a, b, c).
+        Add b to the list of ear tips if the angle is convex and the closure of the triangle (a,b,c)
+        does not contain any vertex of the polygon
         :param a: Vertex
         :param b: Vertex
         :param c: Vertex

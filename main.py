@@ -2,8 +2,6 @@ import earclipping as e
 import dll as dll
 import json
 from typing import List
-import gc
-import matplotlib.pyplot as plt
 
 
 def loadJSON(instanceName):
@@ -221,7 +219,7 @@ def getTriangleData(instanceName):
     return verticesDoublyLinkedList
 
 
-instance_name = "maze_4344_250_001_01" + ".instance"
+instance_name = "fpg-poly_0000004900_h2" + ".instance"
 vertices = getTriangleData(instance_name)
 
 # Useful for debugging:
@@ -239,4 +237,4 @@ vertices = getTriangleData(instance_name)
 
 DT = e.EarClipping(vertices, instance_name)
 DT.plot()
-# DT.export()
+DT.export()
