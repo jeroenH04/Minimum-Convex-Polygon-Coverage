@@ -1,4 +1,3 @@
-import delaunay as d
 import earclipping as e
 import dll as dll
 import json
@@ -18,7 +17,7 @@ def pointMap(o):
     return o["x"], o["y"]
 
 
-def direction(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex) -> bool:
+def direction(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex) -> int:
     """
     :param a: Vertex
     :param b: Vertex
@@ -101,6 +100,22 @@ def getTriangleData(instanceName):
             bridgeCandidate = pairs.pop()
             innerBridge, outerBridge = bridgeCandidate[0], bridgeCandidate[1]
 
+            nextBridgeCandidate = pairs[-1]
+            nextInnerBridge, nextOuterBridge = nextBridgeCandidate[0], nextBridgeCandidate[1]
+
+            # Check if the bridge candidate is twice in the pairs
+            # If so, pick the first occurrence of the candidate in the DLL
+            if outerBridge.x == nextOuterBridge.x and outerBridge.y == nextOuterBridge.y:
+                i = 0
+                tempVertex = verticesDoublyLinkedList.head
+                while i < verticesDoublyLinkedList.length():
+                    if tempVertex.vertex.x == outerBridge.x and tempVertex.vertex.y == outerBridge.y:
+                        outerBridge = tempVertex.vertex
+                        break
+
+                    tempVertex = tempVertex.next
+                    i += 1
+
             # Check if any outer edge intersects the bridge candidate
             outerIdx = 0
             outerVertex = verticesDoublyLinkedList.head
@@ -133,14 +148,14 @@ def getTriangleData(instanceName):
             if not intersect:
                 found = True
 
-        # Add bridge to the outer polygon
         outerIdx = 0
         outerVertex = verticesDoublyLinkedList.head
         outerLength = verticesDoublyLinkedList.length()
+
+        # Add bridge to the outer polygon
         while outerIdx < outerLength:
             # Search for the outer vertex of the bridge
             if outerVertex.vertex == outerBridge:
-
                 # Search for the inner vertex of the bridge
                 innerIdx = 0
                 innerVertex = innerVerticesDoublyLinkedList.head
@@ -176,7 +191,7 @@ def getTriangleData(instanceName):
     return verticesDoublyLinkedList
 
 
-instance_name = "maze_79_50_05_005" + ".instance"
+instance_name = "ccheese142" + ".instance"
 vertices = getTriangleData(instance_name)
 
 # Useful for debugging:
@@ -190,8 +205,6 @@ vertices = getTriangleData(instance_name)
 #     o = o.next
 #     i += 1
 
-# DT = d.DelaunayTriangulation(vertices, instance_name)
-# DT.plot()
 
 DT = e.EarClipping(vertices, instance_name)
 DT.plot()

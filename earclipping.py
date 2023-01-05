@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import json
 import math
+from copy import deepcopy
 
 
 class Edge:
@@ -26,15 +27,6 @@ class Triangle:
         """
         self.v: List[dll.Vertex] = [a, b, c]
         self.edges: List[Edge] = [Edge(a, b), Edge(b, c), Edge(c, a)]
-
-    def containsVertex(self, vertex: dll.Vertex) -> bool:
-        """
-        Check if a vertex is part of the triangle
-
-        :param vertex: vertex to be checked
-        :return: whether vertex is part of the triangle
-        """
-        return (self.v[0] == vertex) or (self.v[1] == vertex) or (self.v[2] == vertex)
 
 
 def areaOfTriangle(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex):
@@ -61,13 +53,14 @@ class EarClipping:
         self.name = name
         self.triangulation = []
         self.vertices = vertices
+        self.allVertices = deepcopy(vertices)
         self.earTips = []
 
         self.triangulate()
 
     def getAngle(self, a: dll.Vertex, b: dll.Vertex, c: dll.Vertex):
         """
-        Calculate the angle between 3 vertices, and add it to the eartips list if the angle is convex
+        Calculate the angle between 3 vertices, and add it to the ear tips list if the angle is convex
         :param a: Vertex
         :param b: Vertex
         :param c: Vertex
@@ -80,8 +73,8 @@ class EarClipping:
 
         if ang < 180:  # Convex
             idx = 0
-            v = self.vertices.head
-            while idx < self.vertices.length():
+            v = self.allVertices.head
+            while idx < self.allVertices.length():
                 if isInside(a, b, c, v.vertex):
                     # Check if the closure of the triangle does not contain any (reflex) vertex of P
                     containsPoint = True
@@ -102,6 +95,7 @@ class EarClipping:
               and `Triangulation by Ear Clipping` by Eberly, David et al.
         """
         n = self.vertices.length()
+
         v = self.vertices.head
         idx = 0
 
@@ -171,7 +165,7 @@ class EarClipping:
 
         fig, ax = plt.subplots()
         ax.triplot(tri.Triangulation(x_s, y_s, ts), 'bo--')
-        ax.set_title('Plot of Delaunay triangulation')
+        ax.set_title('Triangulation ' + self.name)
 
         plt.show()
 
