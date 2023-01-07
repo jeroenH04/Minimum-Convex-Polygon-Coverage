@@ -34,16 +34,17 @@ def direction(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex) -> int:
     return 1  # CW
 
 
-def linesIntersect(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex, d: dll.Vertex) -> bool:
+def linesIntersect(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex, d: dll.Vertex, soft=True) -> bool:
     """
     Check if the line (a,b) intersects the line (c,d)
+    :param soft: bool
     :param a: Vertex
     :param b: Vertex
     :param c: Vertex
     :param d: Vertex
     :return: bool
     """
-    if (a.x == c.x and a.y == c.y) or (a.x == d.x and a.y == d.y) or \
+    if soft and (a.x == c.x and a.y == c.y) or (a.x == d.x and a.y == d.y) or \
             (b.x == c.x and b.y == c.y) or (b.x == d.x and b.y == d.y):
         return False
 
@@ -70,16 +71,6 @@ def getTriangleData(instanceName):
 
     # Add holes to the polygon
     for hole in holes:
-        # Useful for debugging:
-        # i = 0
-        # o = verticesDoublyLinkedList.head
-        # while i < verticesDoublyLinkedList.length():
-        #     # plt.plot(o.vertex.x, o.vertex.y, 'bo--')
-        #     plt.plot([o.vertex.x, o.next.vertex.x], [o.vertex.y, o.next.vertex.y], '-')
-        #     o = o.next
-        #     i += 1
-        #
-        # plt.show()
         """
         Create pairs between the inner vertices and the outer vertices to find bridge candidates
         based on `Ear-Clipping Based Algorithms of Generating High-quality Polygon Triangulation` by Mei, Gang et al
@@ -105,7 +96,7 @@ def getTriangleData(instanceName):
 
         # Sort the bridge candidate pairs on distance
         pairs.sort(key=lambda pair: pair[2], reverse=True)
-        found = noPairs = False
+        found, noPairs = False, False
         innerBridge, outerBridge = None, None
 
         while not found:
@@ -122,39 +113,42 @@ def getTriangleData(instanceName):
             bridgeCandidate = pairs.pop()
             innerBridge, outerBridge = bridgeCandidate[0], bridgeCandidate[1]
 
-            if len(pairs) > 0:
-                nextBridgeCandidate = pairs[-1]
-                nextOuterBridge = nextBridgeCandidate[1]
-
-                # Check if the bridge candidate is twice in the pairs
-                if outerBridge.x == nextOuterBridge.x and outerBridge.y == nextOuterBridge.y:
-                    intersect2 = False
-                    i = 0
-                    tempVertex = verticesDoublyLinkedList.head
-                    while i < verticesDoublyLinkedList.length():
-                        if tempVertex.vertex.x == outerBridge.x and tempVertex.vertex.y == outerBridge.y:
-                            # Check if any outer edge intersects the bridge candidate
-                            outerIdx = 0
-                            outerVertex = verticesDoublyLinkedList.head
-                            while outerIdx < verticesDoublyLinkedList.length():
-                                if linesIntersect(innerBridge, tempVertex.next.vertex, outerVertex.vertex,
-                                                  outerVertex.next.vertex) or \
-                                        linesIntersect(innerBridge, tempVertex.previous.vertex, outerVertex.vertex,
-                                                       outerVertex.next.vertex):
-                                    if intersect2:
-                                        intersect = True
-                                    intersect2 = True
-                                    break
-
-                                outerVertex = outerVertex.next
-                                outerIdx += 1
-
-                            if not intersect2:
-                                outerBridge = tempVertex.vertex
+            if outerBridge.isCopied and len(pairs) > 0:
+                # The bridge candidate was copied, check whether this or the equivalent vertex should be picked
+                intersect2 = False
+                i = 0
+                temp = verticesDoublyLinkedList.head
+                while i < verticesDoublyLinkedList.length():
+                    if temp.vertex.x == outerBridge.x and temp.vertex.y == outerBridge.y:
+                        # Check if any outer edge intersects the bridge candidate
+                        outerIdx = 0
+                        outerVertex = verticesDoublyLinkedList.head
+                        while outerIdx <= verticesDoublyLinkedList.length():
+                            if temp.next.vertex.isCopied or temp.previous.vertex.isCopied:
+                                intersect = True
                                 break
 
-                        tempVertex = tempVertex.next
-                        i += 1
+                            if linesIntersect(innerBridge, temp.next.vertex, outerVertex.vertex,
+                                              outerVertex.next.vertex) or \
+                                    linesIntersect(innerBridge, temp.previous.vertex, outerVertex.vertex,
+                                                   outerVertex.next.vertex):
+                                if intersect2:
+                                    # Both copies of the bridge candidate intersect
+                                    intersect = True
+                                # The current bridge candidate intersects
+                                intersect2 = True
+                                break
+
+                            outerVertex = outerVertex.next
+                            outerIdx += 1
+
+                        if not intersect2:
+                            # This copy did not intersect anything, so reset the outer bridge
+                            outerBridge = temp.vertex
+                            break
+
+                    temp = temp.next
+                    i += 1
 
             # Check if any outer edge intersects the bridge candidate
             outerIdx = 0
@@ -207,16 +201,18 @@ def getTriangleData(instanceName):
                     # Search for the outer vertex of the bridge
                     if innerVertex.vertex == innerBridge:
                         # Connect inner DLL to outer DLL
-                        outerVertexCopy = dll.Node(dll.Vertex(outerVertex.vertex.x, outerVertex.vertex.y))
-                        innerVertexCopy = dll.Node(dll.Vertex(innerVertex.vertex.x, innerVertex.vertex.y))
+                        outerVertexCopy = dll.Node(dll.Vertex(outerVertex.vertex.x, outerVertex.vertex.y, 0.0, True))
+                        innerVertexCopy = dll.Node(dll.Vertex(innerVertex.vertex.x, innerVertex.vertex.y, 0.0, True))
 
                         outerVertexCopy.previous = outerVertex.previous
                         outerVertexCopy.next = innerVertexCopy
                         outerVertex.previous.next = outerVertexCopy
+                        outerVertex.vertex.isCopied = True
 
                         innerVertexCopy.previous = outerVertexCopy
                         innerVertexCopy.next = innerVertex.next
                         innerVertex.next.previous = innerVertexCopy
+                        innerVertex.vertex.isCopied = True
 
                         innerVertex.next = outerVertex
                         outerVertex.previous = innerVertex
@@ -265,4 +261,4 @@ def main(instance_name: str, plot=True, export=True):
         DT.export()
 
 
-main('ccheese4390')
+main('srpg_smo_mc0005962')

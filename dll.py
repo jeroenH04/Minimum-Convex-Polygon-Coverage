@@ -3,7 +3,7 @@ import math
 
 
 class Vertex:
-    def __init__(self, x: int, y: int, angle=0.0):
+    def __init__(self, x: int, y: int, angle=0.0, isCopied=False):
         """
         :param x: x-coordinate of the vertex
         :param y: y-coordinate of the vertex
@@ -12,9 +12,7 @@ class Vertex:
         self.x = x
         self.y = y
         self.angle = angle
-
-    # def __eq__(self, other):
-    #     return self.x == other.x and self.y == other.y and self.angle == other.angle
+        self.isCopied = isCopied
 
     def calculateDistance(self, other):
         return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
