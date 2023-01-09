@@ -1,6 +1,8 @@
 import dll as dll
 from typing import List
 from earclipping import Edge
+import matplotlib.pyplot as plt
+import json
 
 class Polygon:
     def __init__(self, vertices: List[dll.Vertex], edges: List[Edge]):
@@ -24,7 +26,6 @@ class HertelMehlhorn:
         :param DT: triangulation of the polygon
         """
         self.DT = DT
-        self.vertices = DT.vertices
         self.triangulation = DT.triangulation
         self.polygons = []
 
@@ -132,8 +133,9 @@ class HertelMehlhorn:
                     j = (j + 1) % (polygon2.getNumPoints())
 
                 #replace poly1 and poly2 with newpoly
+                self.polygons = [newPolygon if p == polygon1 else p for p in self.polygons]
                 self.polygons.remove(polygon2);
-                self.polygons[t1] = newPolygon
+                
                 i11 = -1;
 
                 continue
@@ -141,6 +143,54 @@ class HertelMehlhorn:
             #If no new polygon was created, move on to the next one
             t1 += 1
 
-        print('There are', len(self.polygons), 'polygons')
+        print(len(self.polygons), 'polygons')
         self.DT.polygons = self.polygons
-        return self.DT
+        return self
+
+    def plot(self):
+        """
+        Plot the triangulation
+        """
+        allPoints = []
+        allPolygons = []
+        for polygon in self.polygons:
+            polygonPoints = []
+            for vertex in polygon.v:
+                allPoints.append(vertex)
+                polygonPoints.append(vertex)
+            polygonPoints.append(polygonPoints[0])
+            allPolygons.append(polygonPoints)
+
+        x_s = [p.x for p in allPoints]
+        y_s = [p.y for p in allPoints]
+
+        #for t in self.triangulation:
+        #    ts.append((ps.index(t.v[0]), ps.index(t.v[1]), ps.index(t.v[2])))
+
+        fig, ax = plt.subplots()
+        ax.scatter(x_s, y_s)
+        for polygon in allPolygons:
+            x_p = [p.x for p in polygon]
+            y_p = [p.y for p in polygon]
+            ax.plot(x_p, y_p, 'b')
+        #ax.triplot(tri.Triangulation(x_s, y_s, ts), 'bo--')
+        ax.set_title('Plot of polygons')
+
+        plt.show()
+
+    def export(self):
+        export = {
+            "type": "CGSHOP2023_Solution",
+            "instance": self.DT.name,
+            "polygons": []
+        }
+
+        for polygon in self.polygons:
+            export['polygons'].append([{'x': v.x, 'y': v.y} for v in polygon.v])
+
+        # Serializing json
+        json_object = json.dumps(export, indent=4)
+
+        # Writing to sample.json
+        with open(self.DT.name + "-sol" + ".json", "w") as outfile:
+            outfile.write(json_object)

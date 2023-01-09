@@ -162,7 +162,7 @@ def getTriangleData(instanceName):
     return verticesDoublyLinkedList
 
 
-instance_name = "fpg-poly_0000000020_h1" + ".instance"
+instance_name = "srpg_iso_aligned_mc0001336" + ".instance"
 vertices = getTriangleData(instance_name)
 
 # Useful for debugging:
@@ -180,6 +180,8 @@ vertices = getTriangleData(instance_name)
 # DT.plot()
 
 DT = e.EarClipping(vertices, instance_name)
-DT = hm.HertelMehlhorn(DT)
-DT.plot()
-DT.export()
+print(len(DT.triangulation), 'triangles')
+HM = hm.HertelMehlhorn(DT)
+#HM.DT.plot()
+HM.plot(HM)
+HM.export(HM)
