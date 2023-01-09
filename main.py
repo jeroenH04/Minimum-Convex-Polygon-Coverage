@@ -3,7 +3,6 @@ import dll as dll
 import hm as hm
 import json
 from typing import List
-import matplotlib.pyplot as plt
 from datetime import datetime
 
 
@@ -58,6 +57,10 @@ def linesIntersect(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex, d: dll.Vertex, s
 
 
 def getTriangleData(instanceName):
+    """
+    :param instanceName: string
+    :return: dll.DoublyLinkedList()
+    """
     instance = loadJSON(instanceName)
     verticesDoublyLinkedList = dll.DoublyLinkedList()
 
@@ -237,33 +240,23 @@ def main(instance_name: str, plot=True, export=True):
     instance_name = instance_name + ".instance"
     vertices = getTriangleData(instance_name)
     print('Created doubly linked list in: ', datetime.now() - timestamp)
+
     print('Start triangulation...')
     timestamp = datetime.now()
+    T = e.EarClipping(vertices, instance_name)
+    print('Created triangulation in: ', datetime.now() - timestamp, 'with ', len(T.triangulation), ' triangles')
 
-    # Useful for debugging:
-    # i = 0
-    # o = vertices.head
-    # while i < vertices.length():
-    #     plt.plot([o.vertex.x, o.next.vertex.x], [o.vertex.y, o.next.vertex.y], '-')
-    #     print('vertex: ' + str(o.vertex.x) + ', ' + str(o.vertex.y) + ' '
-    #           'next: ' + str(o.next.vertex.x) + ', ' + str(o.next.vertex.y) + ' '
-    #           'previous: ' + str(o.previous.vertex.x) + ', ' + str(o.previous.vertex.y)
-    #           )
-    #     o = o.next
-    #     i += 1
-    # plt.show()
+    print('Start Hertel Mehlhorn...')
+    timestamp = datetime.now()
+    HM = hm.HertelMehlhorn(T)
+    print('Executed Hertel Mehlhorn in: ', datetime.now() - timestamp, 'resulting in ', len(HM.polygons), ' polygons')
 
-    DT = e.EarClipping(vertices, instance_name)
-    print('Created triangulation in: ', datetime.now() - timestamp)
-
-    print(len(DT.triangulation), 'triangles')
-    HM = hm.HertelMehlhorn(DT)
     if plot:
-        DT.plot()
-        HM.plot(HM)
+        T.plot()
+        HM.plot()
     if export:
-        DT.export()
-        HM.export(HM)
+        T.export()
+        HM.export()
 
 
 main('srpg_smo_mc0005962')

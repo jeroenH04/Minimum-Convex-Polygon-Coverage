@@ -1,7 +1,6 @@
 import dll as dll
 from typing import List
 import matplotlib.pyplot as plt
-import matplotlib.tri as tri
 import json
 import math
 from copy import copy
@@ -187,9 +186,13 @@ class EarClipping:
             ts.append((ps.index(t.v[0]), ps.index(t.v[1]), ps.index(t.v[2])))
 
         fig, ax = plt.subplots()
-        ax.triplot(tri.Triangulation(x_s, y_s, ts), 'bo--')
-        ax.set_title('Triangulation ' + self.name)
 
+        ax.scatter(x_s, y_s)
+        for t in self.triangulation:
+            x_p = [p.x for p in t.v]
+            y_p = [p.y for p in t.v]
+            ax.fill(x_p, y_p)
+        ax.set_title('Triangulation ' + self.name)
         plt.show()
 
     def export(self):
