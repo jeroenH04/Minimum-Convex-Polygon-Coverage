@@ -262,8 +262,8 @@ def main(instance_name: str, plot=True, export=True):
         DT.plot()
         HM.plot(HM)
     if export:
-        DT.plot()
+        DT.export()
         HM.export(HM)
 
 
-main('ccheese142')
+main('srpg_smo_mc0005962')

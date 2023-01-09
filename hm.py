@@ -12,13 +12,14 @@ class Polygon:
         :param c: 3rd vertex of the triangle
         """
         self.v: List[dll.Vertex] = vertices
-        self.edges: List[Edge] = edges
-    
+        self.edges: List[Edge] = edges    
+
     def getNumPoints(self):
         return len(self.v)
 
     def getPoint(self, idx):
         return self.v[idx]
+
 
 class HertelMehlhorn:
     def __new__(self, DT):
@@ -134,12 +135,13 @@ class HertelMehlhorn:
 
                 #replace poly1 and poly2 with newpoly
                 self.polygons = [newPolygon if p == polygon1 else p for p in self.polygons]
+                polygon1 = newPolygon
                 self.polygons.remove(polygon2);
                 
                 i11 = -1;
 
                 continue
-
+        
             #If no new polygon was created, move on to the next one
             t1 += 1
 
@@ -164,16 +166,12 @@ class HertelMehlhorn:
         x_s = [p.x for p in allPoints]
         y_s = [p.y for p in allPoints]
 
-        #for t in self.triangulation:
-        #    ts.append((ps.index(t.v[0]), ps.index(t.v[1]), ps.index(t.v[2])))
-
         fig, ax = plt.subplots()
         ax.scatter(x_s, y_s)
         for polygon in allPolygons:
             x_p = [p.x for p in polygon]
             y_p = [p.y for p in polygon]
-            ax.plot(x_p, y_p, 'b')
-        #ax.triplot(tri.Triangulation(x_s, y_s, ts), 'bo--')
+            ax.fill(x_p, y_p, 'b')
         ax.set_title('Plot of polygons')
 
         plt.show()
