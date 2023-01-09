@@ -111,7 +111,6 @@ class EarClipping:
         """
         Triangulate simple polygon using ear clipping
         based on `Ear-Clipping Based Algorithms of Generating High-quality Polygon Triangulation` by Mei, Gang et al
-              and `Triangulation by Ear Clipping` by Eberly, David et al.
         """
         n = self.vertices.length()
 
