@@ -1,5 +1,6 @@
 import earclipping as e
 import dll as dll
+import hm as hm
 import json
 from typing import List
 import matplotlib.pyplot as plt
@@ -255,10 +256,14 @@ def main(instance_name: str, plot=True, export=True):
     DT = e.EarClipping(vertices, instance_name)
     print('Created triangulation in: ', datetime.now() - timestamp)
 
+    print(len(DT.triangulation), 'triangles')
+    HM = hm.HertelMehlhorn(DT)
     if plot:
         DT.plot()
+        HM.plot(HM)
     if export:
-        DT.export()
+        DT.plot()
+        HM.export(HM)
 
 
-main('srpg_smo_mc0005962')
+main('ccheese142')
