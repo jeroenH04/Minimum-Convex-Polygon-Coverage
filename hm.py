@@ -55,7 +55,9 @@ class HertelMehlhorn:
 
     def decompose(self):
         # For every triangle:
-        for polygon1 in self.polygons:
+        t1 = 0
+        while t1 < len(self.polygons):
+            polygon1 = self.polygons[t1]
             for i11 in range(polygon1.getNumPoints()):
                 # Set d1 and d2 to first two points of the triangle
                 d1 = polygon1.getPoint(i11)
@@ -153,6 +155,9 @@ class HertelMehlhorn:
                 i11 = -1
 
                 continue
+
+            # If no new polygon was created, move on to the next one
+            t1 += 1
 
         self.T.polygons = self.polygons
 

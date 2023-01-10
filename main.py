@@ -255,8 +255,7 @@ def main(instance_name: str, plot=True, export=True):
         T.plot()
         HM.plot()
     if export:
-        T.export()
         HM.export()
 
 
-main('ccheese4390')
+main('fpg-poly_0000004900_h2')
