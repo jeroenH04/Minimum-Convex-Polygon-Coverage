@@ -29,7 +29,7 @@ def isConvex(p1, p2, p3) -> bool:
     :return: bool
     """
     tmp = (p3.y - p1.y) * (p2.x - p1.x) - (p3.x - p1.x) * (p2.y - p1.y)
-    if tmp > 0:
+    if tmp >= 0:
         return True
     else:
         return False
