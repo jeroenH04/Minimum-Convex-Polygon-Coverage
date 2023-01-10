@@ -47,7 +47,10 @@ class HertelMehlhorn:
         for t in self.triangulation:
             self.polygons.append(Polygon(t.v, t.edges))
 
-        self.decompose()
+        prevScore = 0
+        while prevScore - len(self.polygons) != 0:
+            prevScore = len(self.polygons)
+            self.decompose()
 
     def decompose(self):
         # For every triangle:
