@@ -80,4 +80,5 @@ By default, the function will plot both the triangulation and the polygons after
 
  - [Ear-clipping Based Algorithms of Generating High-quality Polygon Triangulation](https://arxiv.org/abs/1212.6038)
  - [Fast triangulation of the plane with respect to simple polygons](https://www.sciencedirect.com/science/article/pii/S0019995885800449)
+ - [Computational Geometry in C](https://doi.org/10.1017/CBO9780511804120)
 
