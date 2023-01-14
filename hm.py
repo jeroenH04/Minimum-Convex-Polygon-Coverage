@@ -47,17 +47,14 @@ class HertelMehlhorn:
         for t in self.triangulation:
             self.polygons.append(Polygon(t.v, t.edges))
 
-        prevScore = 0
-        # Decompose the polygons until there is no improvement on the number of polygons
-        while prevScore - len(self.polygons) != 0:
-            prevScore = len(self.polygons)
-            self.decompose()
+        self.decompose()
 
     def decompose(self):
         # For every triangle:
         t1 = 0
         while t1 < len(self.polygons):
             polygon1 = self.polygons[t1]
+            isPolygonCreated = False
             for i11 in range(polygon1.getNumPoints()):
                 # Set d1 and d2 to first two points of the triangle
                 d1 = polygon1.getPoint(i11)
@@ -151,13 +148,11 @@ class HertelMehlhorn:
                 self.polygons = [newPolygon if p == polygon1 else p for p in self.polygons]
                 polygon1 = newPolygon
                 self.polygons.remove(polygon2)
-                
-                i11 = -1
-
-                continue
+                isPolygonCreated = True
 
             # If no new polygon was created, move on to the next one
-            t1 += 1
+            if not isPolygonCreated:
+                t1 += 1
 
         self.T.polygons = self.polygons
 

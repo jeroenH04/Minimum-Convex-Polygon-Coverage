@@ -257,5 +257,12 @@ def main(instance_name: str, plot=True, export=True):
     if export:
         HM.export()
 
+def run_all():
+    instances = ['example_instance1','fpg-poly_0000000020_h1','fpg-poly_0000000020_h2','socg60','maze_79_50_05_005',
+             'srpg_octa_mc0000082','srpg_iso_aligned_mc0000088','srpg_iso_mc0000080','ccheese142','srpg_octa_mc0000784',
+             'srpg_iso_aligned_mc0001336','maze_4344_250_001_01','ccheese4390','fpg-poly_0000004900_h2','srpg_smo_mc0005962']
+    for i in instances:
+        main(i,plot=False)
 
-main('fpg-poly_0000004900_h2')
+#main('fpg-poly_0000004900_h2')
+run_all()
