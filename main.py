@@ -56,8 +56,9 @@ def linesIntersect(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex, d: dll.Vertex, s
     return dir1 != dir2 and dir3 != dir4
 
 
-def getTriangleData(instanceName):
+def getTriangleData(instanceName, reverseHoles=False):
     """
+    :param reverseHoles:
     :param instanceName: string
     :return: dll.DoublyLinkedList()
     """
@@ -71,7 +72,10 @@ def getTriangleData(instanceName):
     for idx, v in enumerate(outer_boundary):
         verticesDoublyLinkedList.insertAtEnd(dll.Vertex(v[0], v[1], 0), idx == n - 1)
 
-    holes = instance["holes"]
+    if reverseHoles:
+        holes = instance["holes"][::-1]
+    else:
+        holes = instance["holes"]
 
     # Add holes to the polygon
     for hole in holes:
@@ -235,21 +239,29 @@ def getTriangleData(instanceName):
 
 
 def main(instance_name: str, plot=True, export=True):
+    print(instance_name)
     timestamp = datetime.now()
     print('Started creating doubly linked list...')
     instance_name = instance_name + ".instance"
     vertices = getTriangleData(instance_name)
+    vertices_reversed_holes = getTriangleData(instance_name, True)
     print('Created doubly linked list in: ', datetime.now() - timestamp)
 
     print('Start triangulation...')
     timestamp = datetime.now()
     T = e.EarClipping(vertices, instance_name)
+    T_reversed_holes = e.EarClipping(vertices_reversed_holes, instance_name)
     print('Created triangulation in: ', datetime.now() - timestamp, 'with ', len(T.triangulation), ' triangles')
 
     print('Start Hertel Mehlhorn...')
     timestamp = datetime.now()
     HM = hm.HertelMehlhorn(T)
-    print('Executed Hertel Mehlhorn in: ', datetime.now() - timestamp, 'resulting in ', len(HM.polygons), ' polygons')
+    HM_reversed_holes = hm.HertelMehlhorn(T_reversed_holes)
+    print('Executed Hertel Mehlhorn in: ', datetime.now() - timestamp, 'resulting in ',
+          min(len(HM.polygons), len(HM_reversed_holes.polygons)), ' polygons \n')
+
+    if len(HM.polygons) > len(HM_reversed_holes.polygons):
+        HM = HM_reversed_holes
 
     if plot:
         T.plot()
@@ -262,7 +274,7 @@ def run_all():
              'srpg_octa_mc0000082','srpg_iso_aligned_mc0000088','srpg_iso_mc0000080','ccheese142','srpg_octa_mc0000784',
              'srpg_iso_aligned_mc0001336','maze_4344_250_001_01','ccheese4390','fpg-poly_0000004900_h2','srpg_smo_mc0005962']
     for i in instances:
-        main(i,plot=False)
+        main(i, plot=False)
 
-#main('fpg-poly_0000004900_h2')
+# main('srpg_iso_aligned_mc0000088')
 run_all()

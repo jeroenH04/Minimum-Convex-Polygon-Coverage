@@ -41,13 +41,53 @@ class HertelMehlhorn:
         :param T: triangulation of the polygon
         """
         self.T = T
-        self.triangulation = T.triangulation
+        self.triangulation = T.triangulation.copy()
         self.polygons = []
+        scores = []
 
-        for t in self.triangulation:
+        # Run HM on the triangles
+        scores.append(self.run(self.triangulation))
+
+        # Run HM on the triangles in reversed order
+        self.polygons = []
+        scores.append(self.run(self.triangulation[::-1]))
+
+        # Run HM on the triangles sorted on area
+        self.polygons = []
+        T.triangulation.sort(key=lambda triangle: triangle.area, reverse=False)
+        scores.append(self.run(T.triangulation))
+
+        # Run HM on the triangles sorted on area
+        self.polygons = []
+        T.triangulation.sort(key=lambda triangle: triangle.area, reverse=True)
+        scores.append(self.run(T.triangulation))
+
+        # Run HM again on the best results, such that it can be exported
+        min_score = min(scores)
+        index = scores.index(min_score)
+
+        if index == 0:
+            self.polygons = []
+            scores.append(self.run(self.triangulation))
+        elif index == 1:
+            self.polygons = []
+            scores.append(self.run(self.triangulation[::-1]))
+        elif index == 2:
+            self.polygons = []
+            T.triangulation.sort(key=lambda triangle: triangle.area, reverse=False)
+            scores.append(self.run(T.triangulation))
+        else:
+            self.polygons = []
+            T.triangulation.sort(key=lambda triangle: triangle.area, reverse=True)
+            scores.append(self.run(T.triangulation))
+
+    def run(self, triangles):
+        for t in triangles:
             self.polygons.append(Polygon(t.v, t.edges))
 
         self.decompose()
+        return len(self.polygons)
+
 
     def decompose(self):
         # For every triangle:

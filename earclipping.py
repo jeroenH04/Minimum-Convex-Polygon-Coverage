@@ -28,6 +28,7 @@ class Triangle:
         """
         self.v: List[dll.Vertex] = [a, b, c]
         self.edges: List[Edge] = [Edge(a, b), Edge(b, c), Edge(c, a)]
+        self.area = areaOfTriangle(a, b, c)
 
 
 def areaOfTriangle(a: dll.Vertex, b: dll.Vertex, c: dll.Vertex) -> float:
@@ -160,9 +161,6 @@ class EarClipping:
 
                 idx += 1
                 temp = temp.next
-
-        print('Remaining vertices: ' + str(self.vertices.length()))
-        print('Remaining eartips: ' + str(len(self.earTips)))
 
         if len(self.earTips) == 3:
             # If there are still 3 ear tips left, add them as a triangle
